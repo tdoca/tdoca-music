@@ -17,11 +17,6 @@
         </div>
       </div>
       <div class="swiper-button-next" style="transform: translateX(-78px);"></div>
-      <!-- <div id="recommended-image-container" style="width: 80%; height: 50%; padding: 0 10% 0 10%;">
-        <div class="recommended-image" :style="{'width': '80%', 'height': '80%', 'top': '10%', 'position': 'relative', 'background-image': `url(${this.recommend_list[0].image_url})`, 'background-size': 'cover'}"></div>
-        <div class="recommended-image" :style="{'width': '80%', 'height': '100%', 'top': '-80%', 'left': '10%', 'position': 'relative', 'z-index': '1', 'background-image': `url(${this.recommend_list[1].image_url})`, 'background-size': 'cover'}"></div>
-        <div class="recommended-image" :style="{'width': '80%', 'height': '80%', 'top': '-170%', 'left': '20%', 'position': 'relative', 'background-image': `url(${this.recommend_list[2].image_url})`, 'background-size': 'cover'}"></div>
-      </div> -->
     </div>
   </div>
 </template>
@@ -29,6 +24,7 @@
 <script>
 import Swiper from 'swiper'
 import $ from 'jquery'
+import {getTopPlaylist} from '@/libs/api'
 export default {
   name: 'browser-home',
   data: function() {
@@ -71,35 +67,9 @@ export default {
         recommended.autoplay.start()
       })
 
-      // let images = $('.recommended-image')
-      // images[images.length-1].next = images[0]
-      // for (let i = 0; i<images.length-1; i++){
-      //   images[i].next = images[i+1]
-      // }
-      // console.log(images)
-
-      // let tmp = 0
-      // $('#recommended-image-container').click(()=>{
-      //   $(images[tmp]).animate({
-      //     left: '20%',
-      //   },'fast')
-
-      //   $(images[tmp].next).animate({
-      //     'z-index': '0',
-      //     left: '0',
-      //     width: '80%',
-      //     height: '80%',
-      //     top: '+=10%'
-      //   },'fast')
-
-      //   $(images[tmp].next.next).animate({
-      //     'z-index': '1',
-      //     left: '10%',
-      //     height: '100%',
-      //     top: '+=10%'
-      //   },'fast')
-      //   tmp++
-      // })
+      getTopPlaylist().then((res)=>{
+        console.log(res)
+      })
     })
   }
 }

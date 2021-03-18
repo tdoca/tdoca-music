@@ -13,7 +13,7 @@ let MongoClient = require('mongodb').MongoClient
 let path = require('path')
 let fs = require('fs')
 const mongodbUrl = 'mongodb://localhost'
-const { search, song_url, song_detail } = require('./NeteaseCloudMusicApi')
+const { search, song_url, song_detail, top_playlist_highquality } = require('./NeteaseCloudMusicApi')
 
 let app = express()
 
@@ -104,6 +104,16 @@ app.get('/api/getMusicDetailById', async (req, res)=>{
         res.writeHead(200, {'Content-Type':'application/json;charset=utf-8'})
         res.end(JSON.stringify(result))
         // res.end()
+    }catch(err){
+        console.log(err)
+    }
+})
+
+app.get('/api/getTopPlaylist', async (req, res)=>{
+    try {
+        const result = await top_playlist_highquality()
+        res.writeHead(200, {'Content-Type':'application/json;charset=utf-8'})
+        res.end(JSON.stringify(result))
     }catch(err){
         console.log(err)
     }

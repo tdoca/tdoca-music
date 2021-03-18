@@ -13,20 +13,16 @@
               <i style="" class="iconfont icon-search"><input type="submit" value="" @click="handleSearch"></i>
             </form>
           </div>
-          <div id="avatar-container">
+          <!-- <div id="avatar-container">
             <user-avatar v-if="this.$store.getters.getLoginState == true" @click="event=>{this.$store.dispatch('showRightBar');this.$store.dispatch('hidePlayList');right_container_view='user';event.stopPropagation()}"></user-avatar>
             <span v-else @click="event=>{this.$store.dispatch('showRightBar');this.$store.dispatch('hidePlayList');right_container_view='login';event.stopPropagation()}">请登录</span>
-          </div>
+          </div> -->
         </div>
       </div>
       <router-view />
       <transition name="right_bar_visibility">
         <div id="right-bar" v-if="this.$store.getters.getRightBarVisibility" @click="handleRightBarClick()">
-          <!-- <div id="right-bar-bg"></div> -->
-          <!-- <canvas id="handleBackground"></canvas> -->
-          <!-- <transition name="right_bar_visibility"> -->
             <component :is="right_container_view"></component>
-          <!-- </transition> -->
         </div>
       </transition>
     </div>
@@ -36,7 +32,7 @@
 <script>
 import('@/assets/iconfont/iconfont.css')
 import defaultBackground from '@/assets/Abstract.jpg'
-import userAvatar from '@/components/user_avatar'
+// import userAvatar from '@/components/user_avatar'
 import user from '@/components/right_bar/user'
 import login from '@/components/right_bar/login'
 import register from '@/components/right_bar/register'
@@ -44,14 +40,14 @@ import { mapActions, mapMutations } from 'vuex'
 export default {
   name: 'app',
   components: {
-    userAvatar,
+    // userAvatar,
     user,
     login,
     register
   },
   data() {
     return {
-      right_bar_visibility: false,
+      // right_bar_visibility: false,
       right_container_view: '',
       blur_bg: `url('${defaultBackground}')`,
       old_cover: null,
@@ -93,7 +89,6 @@ export default {
       this.hidePlayList()
     },
     handleSearch: function() {
-      console.log("search")
       this.setSearchKeywords(this.$refs['searchValue'].value)
       if(this.$route.name != 'browser-search') {
         this.$router.push({name: 'browser-search'})
@@ -114,17 +109,19 @@ export default {
         //设置canvas的宽高
         canvas.height = img.height;
         canvas.width = img.width;
+
         //将图像绘制到canvas上面
         ctx.drawImage(img, 0, 0, img.width, img.height);
+
         //从画布获取图像
-        // createImageBitmap
         img.crossOrigin='anonymous'
         let data = ctx.getImageData(0, 0, img.width, img.height);
+
         //将图像数据进行高斯模糊 data.data是一个数组，每四个值代表一个像素点的rgba的值，data.width data.height 分别代表图像数据的宽高
         let emptyData = gaussBlur(data);
+
         //将模糊的图像数据再渲染到画布上面
         ctx.putImageData(emptyData, 0, 0);
-        // console.log(canvas.toDataURL("image / png"))
         this.blur_bg = `url(${canvas.toDataURL('image/png')})`
     };
 
@@ -148,7 +145,6 @@ export default {
             g = a * Math.exp(b * x * x);
             gaussMatrix[i] = g;
             gaussSum += g;
-
         }
 
         //归一化, 保证高斯矩阵的值在[0,1]之间
@@ -174,7 +170,6 @@ export default {
                 }
                 i = (y * width + x) * 4;
                 // 除以 gaussSum 是为了消除处于边缘的像素, 高斯运算不足的问题
-                // console.log(gaussSum)
                 pixes[i] = r / gaussSum;
                 pixes[i + 1] = g / gaussSum;
                 pixes[i + 2] = b / gaussSum;
@@ -222,12 +217,6 @@ export default {
   background: rgba(0, 0, 0, 0.2);
 }
 
-// *::-webkit-scrollbar-track {
-  // box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  // border-radius: 5px;
-  // background: rgba(0, 0, 0, 0.1);
-// }
-
 body {
   margin: 0;
 }
@@ -246,9 +235,6 @@ a {
 }
 
 #app {
-  // @media screen and (max-width: 1280px) {
-  //   width: 1280px;
-  // }
   position: absolute;
   // overflow: hidden;
   width: 100%;
@@ -265,12 +251,8 @@ a {
     width: 100%;
     height: 100%;
     background: no-repeat 50% 50%;
-    // https://s2.ax1x.com/2020/03/10/8CQoFO.png
-    // https://i1.100024.xyz/i/2020/10/12/k9nht5.jpg
-    // background-image: url("assets/Abstract.jpg");
     background-size: cover;
     transition: background-image 1s;
-    // z-index: 1;
   }
   // #bg::after {
   //   position: absolute;

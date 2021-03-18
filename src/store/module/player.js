@@ -2,9 +2,7 @@
 // const musicRootPath = "http://localhost:8888/api/getMusic?musicName="
                      //https://music.163.com/song/media/outer/url?id=
                      //http://localhost:8888/getMusic?name=
-import {getMusicUrlById} from '@/libs/api.js'
-import axios from 'axios'
-import { getMusicDetailById } from '../../libs/api'
+import {getMusicListInfoByIds} from '@/libs/api.js'
 
 export default {
     state: {
@@ -55,12 +53,10 @@ export default {
     },
     mutations: {
         addMusicToList: (state, musicObj) => {
-        // if(state.play_list[state.play_list.length - 1])
             state.play_list.push(musicObj)
         },
         setMusicItem: (state, music) => {
             state.play_item = music
-            // state.play_item.prototype = state.Music
             state.audio.setAttribute('src', state.play_item.source)
         }
     },
@@ -81,23 +77,15 @@ export default {
             play_list[play_list.length - 1].next = play_list[0]
             query+=`,${play_list[play_list.length-1].id}`
 
-            await axios.all([getMusicUrlById({id:query}), getMusicDetailById({ids:query})]).then(axios.spread(function(music_url,music_detail){
-                for(let i = 0; i<play_list.length; i++){
-                    play_list[i].source = music_url.data.body.data[i].url
-                    play_list[i].cover = music_detail.data.body.songs[i].al.picUrl
-                    play_list[i].name = music_detail.data.body.songs[i].name
-                    play_list[i].duration = music_detail.data.body.songs[i].dt
-                    play_list[i].album = {
-                        name: music_detail.data.body.songs[i].al.name,
-                        id : music_detail.data.body.songs[i].al.id
-                    }
-                    play_list[i].artists = {
-                        name: music_detail.data.body.songs[i].ar[0].name,
-                        id: music_detail.data.body.songs[i].ar[0].id
+            await getMusicListInfoByIds(query).then((result)=>{
+                // play_list = JSON.parse(JSON.stringify(result));
+                // Object.assign(result,play_list)
+                for(let i=0; i<result.length; i++){
+                    for(let item in result[i]) {
+                        play_list[i][item] = result[i][item]
                     }
                 }
-            }))
-            console.log(play_list)
+            })
             commit('setMusicItem', play_list[0])
             return state.play_list = play_list
         },

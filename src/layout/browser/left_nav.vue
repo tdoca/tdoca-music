@@ -23,23 +23,10 @@
       </div>
     </div>
     <div id="music-list-container" class="list-container">
-      <div class="list-title"><span>我的歌单</span></div>
+      <!-- <div class="list-title"><span>我的歌单</span></div>
       <div id="music-list" class="list-container">
         <div class="list-item"><i class="iconfont"></i><span>dsadsadsa</span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-        <div class="list-item"><i class="iconfont"></i><span></span></div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -47,9 +34,6 @@
 <script>
 export default {
   name: 'left-nav',
-  mounted: function () {
-    console.log(this.$refs['music-name']);
-  },
 };
 </script>
 

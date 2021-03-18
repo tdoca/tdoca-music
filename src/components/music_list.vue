@@ -11,14 +11,13 @@
     <div class="music-item" :class="musicList.indexOf(musicItem)%2===0 ? 'even':'odd'" v-for="musicItem in musicList" :key="musicList.indexOf(musicItem)" @click="handleMusicItemClick(musicItem)" @contextmenu="menuHandle($event)">
       <span class="music-item-number">{{musicList.indexOf(musicItem)}}</span>
       <span class="music-item-name">{{musicItem.name}}</span>
-      <span class="music-item-artists"><router-link :to="`browser-search/${musicItem.artists.name}`">{{musicItem.artists.name}}</router-link></span>
+      <span class="music-item-artists"><router-link :to="`browser-search/${musicItem.artists.name||musicItem.artists[0].name}`">{{musicItem.artists.name||musicItem.artists[0].name}}</router-link></span>
       <span class="music-item-album"><router-link :to="`browser-search/${musicItem.album.name}`">{{musicItem.album.name}}</router-link></span>
       <span class="music-item-duration">{{`${parseInt(musicItem.duration/60000)}:${(musicItem.duration-parseInt(musicItem.duration/60000)*60000)/1000}`}}</span>
       <span class="music-item-favorites"><i class="iconfont" :class="musicItem.favorites ? 'icon-favorites-fill':'icon-favorites' "></i></span>
     </div>
     <transition name="menu_visibility">
       <ul class="menu" id="menu" v-show="menu_visibility" ref="menu">
-        <!-- <component :is="menu_view"></component> -->
         <li id="sendMsg"><i class="iconfont icon-play"></i><span>播放并添加到播放栏</span></li>
         <li id="deleteFriend"><i class="iconfont icon-gedan"></i><span>专辑：</span></li>
         <li id="addToBlack">加入黑名单</li>
@@ -29,7 +28,7 @@
 </template>
 
 <script>
-// import Vue from 'vue'
+import {getMusicInfoById} from '@/libs/api'
 export default {
   name: 'music-list',
   data: function() {
@@ -38,11 +37,6 @@ export default {
       menu_view: 'play_list'
     }
   },
-  // components:{
-  //   play_list: {
-  //     template: '<li id="sendMsg"><i class="iconfont icon-play"></i><span>播放并添加到播放栏</span></li>'
-  //   }
-  // },
   props: {
     musicList: {
       type: Array,
@@ -72,32 +66,24 @@ export default {
     handleMusicItemClick: async function(musicItem) {
       console.log(musicItem)
       let play_list = this.$store.getters.getPlayList
-      // play_list[play_list.length-1].next = musicItem
-      // musicItem.prev = play_list[play_list.length-1]
-      // musicItem.next = play_list[0]
       for(let play_item of play_list) {
         if(play_item.id === musicItem.id) {
           this.$store.dispatch('musicInit',musicItem)
           this.$store.dispatch('playMusic')
           return
-          // break
         }
       }
-      play_list.push(musicItem)
-      this.$store.dispatch('musicListInit',play_list)
-      console.log(play_list)
-      this.$store.dispatch('musicInit',musicItem)
-      this.$store.dispatch('playMusic')
-      // (async ()=>{this.$store.dispatch('playMusic')})()
-      // (function(){this.$store.getters.getAudio.play()})()
+      await getMusicInfoById(musicItem.id).then((result)=>{
+        console.log(result)
+        play_list.push(result)
+        this.$store.dispatch('musicListInit',play_list)
+        this.$store.dispatch('musicInit',musicItem)
+        this.$store.dispatch('playMusic')
+      })
     },
     menuHandle: function(event) {
-      // this.musicList.splice(key,1)
-      // console.log(this.$store.getters.getPlayList)
       console.log(event)
-      // var menu=document.getElementById('menu');
       this.menu_visibility=true
-      // menu.style.visibility='visible';
       let menu = this.$refs['menu']
       menu.style.top = event.clientY + 'px'
       menu.style.left=event.clientX+'px';
