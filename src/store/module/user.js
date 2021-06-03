@@ -1,32 +1,60 @@
+import {getMusicDetailById} from '@/libs/api'
+
 export default {
   state: {
-    name: '',
-    avatar: '',
-    introduce: '',
-    logined: false
+    uid: '',
+    user_name: '',
+    login_status: false,
+    song_sheet_list: []
   },
   getters: {
-    getName: state => {
-      return state.name
+    getUserName: state => {
+      return state.user_name
     },
-    getAvatar: state => {
-      return state.avatar
+    getLoginStatus: state => {
+      return state.login_status
     },
-    getIntroduce: state => {
-      return state.introduce
+    getUid: state => {
+      return state.uid
     },
-    getLoginState: state => {
-      return state.logined
+    getSongSheetList: state => {
+      return state.song_sheet_list
     }
   },
   mutations: {
-    setName: (state, name) => {
-      state.name = name
-    }
-  },
-  actions: {
-    changeUserName: ({commit}, name) => {
-      commit('setName',name)
+    setUserName: (state, userName) => {
+      state.user_name = userName
+    },
+    setLoginStatus: (state, status) => {
+      state.login_status = status
+    },
+    setUid: (state, uid) => {
+      state.uid = uid
+    },
+    setSongSheetList: (state, songSheetList) => {
+      state.song_sheet_list = songSheetList
+    },
+    updateSongSheetList: (state, song_sheet_list) => {
+      let query = new Array
+      for(let i=0; i<song_sheet_list.length; i++){
+        let songs = song_sheet_list[i].songs
+        if(songs.length != 0) {
+          query.push(songs[0])
+        }
+      }
+      query = query.toString()
+      getMusicDetailById({ids:query}).then(res=>{
+        res = res.data.body.songs
+        for(let i=0; i<song_sheet_list.length; i++) {
+          for(let j=0; j<res.length; j++) {
+            if(song_sheet_list[i].songs[0] == res[j].id) {
+              song_sheet_list[i].cover = res[j].al.picUrl
+              break
+            }
+          }
+        }
+      })
+      state.song_sheet_list = song_sheet_list
     }
   }
 }

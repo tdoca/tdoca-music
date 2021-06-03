@@ -1,27 +1,61 @@
 <template>
   <form id="login" onsubmit="return false" autocomplete="off">
     <div id="login-form-container">
-      <span id="login-form-title">Login</span>
+      <span id="login-form-title">sign in</span>
       <span id="username-container">username:<input type="text" name="username" id="username" ref="username"></span>
       <span id="password-container">password:<input type="password" name="password" id="password" ref="password"></span>
-      <span class="form-button"><input type="submit" value="登录" @click="handleLoginButton"></span>
-      <span class="form-button">注册</span>
-      <span class="form-button">找回密码</span>
+      <span class="form-button"><input type="submit" value="登录" @click="handleSubmitButton"></span>
+      <span class="form-button" @click="a">注册</span>
+      <!-- <span class="form-button">找回密码</span> -->
     </div>
   </form>
 </template>
 
 <script>
-import {login} from '@/libs/api'
+import {signIn, getSongSheetByUid, getMusicListByIds, getPlayHistoryByUid} from '@/libs/api'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'login',
   methods: {
-    handleLoginButton: function(){
+    handleSubmitButton: function(){
       let username = this.$refs['username'].value
       let password = this.$refs['password'].value
-      console.log('login')
-      login({username,password})
-    }
+      signIn({username,password}).then(res=>{
+        if(res.data.status == 'true') {
+          this.$store.commit('setLoginStatus',true)
+          this.$store.commit('setUserName',username)
+          this.$store.commit('setUid',res.data.uid)
+          getSongSheetByUid({uid: res.data.uid}).then(async res=>{
+            res = res.data
+            for(let i=0; i<res.length; i++) {
+              res[i].cover = ''
+            }
+            // this.$store.commit('setSongSheetList',res)
+            await this.$store.commit('updateSongSheetList',res)
+            console.log(res)
+          })
+          getPlayHistoryByUid({uid: this.getUid()}).then(res=>{
+            getMusicListByIds(res.data.toString()).then(res=>{
+              this.setHistoryList(res)
+            })
+          })
+          // this.$store.commit('setSongSheetList',)
+          alert('登录成功')
+          this.$store.dispatch('hideRightBar')
+        }else {
+          alert('账号或密码错误')
+        }
+      })
+    },
+    a: function(){
+      this.$store.state.app.right_container_view='register'
+    },
+    ...mapGetters([
+      'getUid'
+    ]),
+    ...mapMutations([
+      'setHistoryList'
+    ])
   }
 }
 </script>

@@ -1,23 +1,50 @@
 const routes = [
+  // {
+  //   path: '/',
+  //   name: 'browser',
+  //   component: ()=>import('../layout/browser/index.vue'),
+  //   children: [
+  //     {
+  //       path: '/',
+  //       name: 'browser-home',
+  //       component: ()=>import('../layout/browser/views/home.vue')
+  //     },
+  //     {
+  //       path: 'hot',
+  //       name: 'browser-hot',
+  //       component: ()=>import('@/layout/browser/views/hot.vue')
+  //     },
+  //     {
+  //       path: 'search',
+  //       name: 'browser-search',
+  //       component: ()=>import('@/layout/browser/views/search.vue')
+  //     }
+  //   ]
+  // },
   {
     path: '/',
-    name: 'browser',
-    component: ()=>import('../layout/browser/index.vue'),
+    name: 'player',
+    component: ()=>import('@/layout/player/index.vue'),
     children: [
       {
-        path: '/',
-        name: 'browser-home',
-        component: ()=>import('../layout/browser/views/home.vue')
-      },
-      {
-        path: 'hot',
-        name: 'browser-hot',
-        component: ()=>import('@/layout/browser/views/hot.vue')
-      },
-      {
         path: 'search',
-        name: 'browser-search',
-        component: ()=>import('@/layout/browser/views/search.vue')
+        name: 'player-search',
+        component: ()=>import('@/layout/player/views/search.vue')
+      },
+      {
+        path: 'songlist',
+        name: 'songlist',
+        component: ()=>import('@/layout/player/views/song_list.vue')
+      },
+      {
+        path: 'playlist',
+        name: 'playlist',
+        component: ()=>import('@/layout/player/views/play_list.vue')
+      },
+      {
+        path: 'history',
+        name: 'history',
+        component: ()=>import('@/layout/player/views/history.vue')
       }
     ]
   },

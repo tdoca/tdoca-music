@@ -1,5 +1,5 @@
 <template>
-  <div id="app" @click="handleAppClick" oncontextmenu="return false">
+  <div id="app" @click="handleAppClick($event)"> <!--oncontextmenu="return false"-->
     <div id="bg" ref="bg" :style="{'background-image': blur_bg}"></div>
     <div id="main">
       <div id="top-bar">
@@ -13,16 +13,18 @@
               <i style="" class="iconfont icon-search"><input type="submit" value="" @click="handleSearch"></i>
             </form>
           </div>
-          <!-- <div id="avatar-container">
-            <user-avatar v-if="this.$store.getters.getLoginState == true" @click="event=>{this.$store.dispatch('showRightBar');this.$store.dispatch('hidePlayList');right_container_view='user';event.stopPropagation()}"></user-avatar>
-            <span v-else @click="event=>{this.$store.dispatch('showRightBar');this.$store.dispatch('hidePlayList');right_container_view='login';event.stopPropagation()}">请登录</span>
-          </div> -->
+          <div id="username-container">
+            <span v-if="this.$store.getters.getLoginStatus == true">
+              {{this.$store.getters.getUserName}}
+            </span>
+            <span id="login-view" v-else @click="event=>{this.$store.dispatch('showRightBar');this.$store.state.app.right_container_view='login';event.stopPropagation()}">请登录</span>
+          </div>
         </div>
       </div>
       <router-view />
       <transition name="right_bar_visibility">
-        <div id="right-bar" v-if="this.$store.getters.getRightBarVisibility" @click="handleRightBarClick()">
-            <component :is="right_container_view"></component>
+        <div id="right-bar" v-if="this.$store.getters.getRightBarVisibility" @click="handleRightBarClick($event)">
+            <component :is="this.$store.state.app.right_container_view"></component>
         </div>
       </transition>
     </div>
@@ -30,25 +32,21 @@
 </template>
 
 <script>
-import('@/assets/iconfont/iconfont.css')
+// import('@/assets/iconfont/iconfont.css')
 import defaultBackground from '@/assets/Abstract.jpg'
-// import userAvatar from '@/components/user_avatar'
-import user from '@/components/right_bar/user'
 import login from '@/components/right_bar/login'
 import register from '@/components/right_bar/register'
 import { mapActions, mapMutations } from 'vuex'
 export default {
   name: 'app',
   components: {
-    // userAvatar,
-    user,
     login,
     register
   },
   data() {
     return {
-      // right_bar_visibility: false,
-      right_container_view: '',
+      right_bar_visibility: false,
+      // right_container_view: '',
       blur_bg: `url('${defaultBackground}')`,
       old_cover: null,
       isRouterAlive: true
@@ -60,7 +58,7 @@ export default {
     }
   },
   mounted: function() {
-    this.$store.getters.getAudio.setAttribute("preload", 'auto');
+    this.$store.getters.getAudio.setAttribute("preload", 'none');
     this.$store.getters.getAudio.addEventListener('play', () => {
       if(this.$store.getters.getPlayItem.cover !== this.old_cover) {
         this.handleBackground(this.$store.getters.getPlayItem.cover)
@@ -84,28 +82,32 @@ export default {
         this.showSearchView() 
       })
     },
-    handleAppClick: function () {
+    handleAppClick: function (event) {
       this.hideRightBar()
-      this.hidePlayList()
+      this.$store.state.app.menu_visibility=false
+      event.stopPropagation()
     },
     handleSearch: function() {
       this.setSearchKeywords(this.$refs['searchValue'].value)
-      if(this.$route.name != 'browser-search') {
-        this.$router.push({name: 'browser-search'})
+      if(this.$route.name != 'player-search') {
+        this.$router.push({name: 'player-search'})
       } else {
+        console.log('reload')
         this.reload()
       }
     },
-    handleRightBarClick: function() {
+    handleRightBarClick: function(event) {
       event.stopPropagation()
     },
-    handleBackground:function(imageSource) {
+    handleBackground: async function(imageSource) {
       let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-    let img = new Image();
-    //这里直接修改图片的路径
-    img.src = imageSource;
-    img.onload = () => {
+      let ctx = canvas.getContext('2d');
+      let img = new Image();
+      //解决资源跨域问题
+      img.crossOrigin = "anonymous";
+      //这里直接修改图片的路径
+      img.src = imageSource
+      img.onload = () => {
         //设置canvas的宽高
         canvas.height = img.height;
         canvas.width = img.width;
@@ -123,83 +125,83 @@ export default {
         //将模糊的图像数据再渲染到画布上面
         ctx.putImageData(emptyData, 0, 0);
         this.blur_bg = `url(${canvas.toDataURL('image/png')})`
-    };
+      }
 
-    function gaussBlur(imgData) {
-        let pixes = imgData.data;
-        let width = imgData.width;
-        let height = imgData.height;
-        let gaussMatrix = [],
-            gaussSum = 0,
-            x, y,
-            r, g, b, a,
-            i, j, k, len;
+      function gaussBlur(imgData) {
+          let pixes = imgData.data;
+          let width = imgData.width;
+          let height = imgData.height;
+          let gaussMatrix = [],
+              gaussSum = 0,
+              x, y,
+              r, g, b, a,
+              i, j, k, len;
 
-        let radius = 50;
-        let sigma = 25;
+          let radius = 100;
+          let sigma = 100;
 
-        a = 1 / (Math.sqrt(2 * Math.PI) * sigma);
-        b = -1 / (2 * sigma * sigma);
-        //生成高斯矩阵
-        for (i = 0, x = -radius; x <= radius; x++, i++) {
-            g = a * Math.exp(b * x * x);
-            gaussMatrix[i] = g;
-            gaussSum += g;
-        }
+          a = 1 / (Math.sqrt(2 * Math.PI) * sigma);
+          b = -1 / (2 * sigma * sigma);
+          //生成高斯矩阵
+          for (i = 0, x = -radius; x <= radius; x++, i++) {
+              g = a * Math.exp(b * x * x);
+              gaussMatrix[i] = g;
+              gaussSum += g;
+          }
 
-        //归一化, 保证高斯矩阵的值在[0,1]之间
-        for (i = 0, len = gaussMatrix.length; i < len; i++) {
-            gaussMatrix[i] /= gaussSum;
-        }
-        //x 方向一维高斯运算
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                r = g = b = a = 0;
-                gaussSum = 0;
-                for (j = -radius; j <= radius; j++) {
-                    k = x + j;
-                    if (k >= 0 && k < width) {//确保 k 没超出 x 的范围
-                        //r,g,b,a 四个一组
-                        i = (y * width + k) * 4;
-                        r += pixes[i] * gaussMatrix[j + radius];
-                        g += pixes[i + 1] * gaussMatrix[j + radius];
-                        b += pixes[i + 2] * gaussMatrix[j + radius];
-                        // a += pixes[i + 3] * gaussMatrix[j];
-                        gaussSum += gaussMatrix[j + radius];
-                    }
-                }
-                i = (y * width + x) * 4;
-                // 除以 gaussSum 是为了消除处于边缘的像素, 高斯运算不足的问题
-                pixes[i] = r / gaussSum;
-                pixes[i + 1] = g / gaussSum;
-                pixes[i + 2] = b / gaussSum;
-                // pixes[i + 3] = a ;
-            }
-        }
-        //y 方向一维高斯运算
-        for (x = 0; x < width; x++) {
-            for (y = 0; y < height; y++) {
-                r = g = b = a = 0;
-                gaussSum = 0;
-                for (j = -radius; j <= radius; j++) {
-                    k = y + j;
-                    if (k >= 0 && k < height) {//确保 k 没超出 y 的范围
-                        i = (k * width + x) * 4;
-                        r += pixes[i] * gaussMatrix[j + radius];
-                        g += pixes[i + 1] * gaussMatrix[j + radius];
-                        b += pixes[i + 2] * gaussMatrix[j + radius];
-                        // a += pixes[i + 3] * gaussMatrix[j];
-                        gaussSum += gaussMatrix[j + radius];
-                    }
-                }
-                i = (y * width + x) * 4;
-                pixes[i] = r / gaussSum;
-                pixes[i + 1] = g / gaussSum;
-                pixes[i + 2] = b / gaussSum;
-            }
-        }
-        return imgData;
-    }
+          //归一化, 保证高斯矩阵的值在[0,1]之间
+          for (i = 0, len = gaussMatrix.length; i < len; i++) {
+              gaussMatrix[i] /= gaussSum;
+          }
+          //x 方向一维高斯运算
+          for (y = 0; y < height; y++) {
+              for (x = 0; x < width; x++) {
+                  r = g = b = a = 0;
+                  gaussSum = 0;
+                  for (j = -radius; j <= radius; j++) {
+                      k = x + j;
+                      if (k >= 0 && k < width) {//确保 k 没超出 x 的范围
+                          //r,g,b,a 四个一组
+                          i = (y * width + k) * 4;
+                          r += pixes[i] * gaussMatrix[j + radius];
+                          g += pixes[i + 1] * gaussMatrix[j + radius];
+                          b += pixes[i + 2] * gaussMatrix[j + radius];
+                          // a += pixes[i + 3] * gaussMatrix[j];
+                          gaussSum += gaussMatrix[j + radius];
+                      }
+                  }
+                  i = (y * width + x) * 4;
+                  // 除以 gaussSum 是为了消除处于边缘的像素, 高斯运算不足的问题
+                  pixes[i] = r / gaussSum;
+                  pixes[i + 1] = g / gaussSum;
+                  pixes[i + 2] = b / gaussSum;
+                  // pixes[i + 3] = a ;
+              }
+          }
+          //y 方向一维高斯运算
+          for (x = 0; x < width; x++) {
+              for (y = 0; y < height; y++) {
+                  r = g = b = a = 0;
+                  gaussSum = 0;
+                  for (j = -radius; j <= radius; j++) {
+                      k = y + j;
+                      if (k >= 0 && k < height) {//确保 k 没超出 y 的范围
+                          i = (k * width + x) * 4;
+                          r += pixes[i] * gaussMatrix[j + radius];
+                          g += pixes[i + 1] * gaussMatrix[j + radius];
+                          b += pixes[i + 2] * gaussMatrix[j + radius];
+                          // a += pixes[i + 3] * gaussMatrix[j];
+                          gaussSum += gaussMatrix[j + radius];
+                      }
+                  }
+                  i = (y * width + x) * 4;
+                  pixes[i] = r / gaussSum;
+                  pixes[i + 1] = g / gaussSum;
+                  pixes[i + 2] = b / gaussSum;
+              }
+          }
+          return imgData;
+      }
     }
   }
 }
@@ -224,14 +226,6 @@ body {
 a {
   text-decoration: none;
   color: black;
-}
-
-.user-container-enter-active, .user-container-leave-active {
-  transition: opacity 1.5s;
-}
-
-.user-container-enter, .user-container-leave-to {
-  opacity: 0;
 }
 
 #app {
@@ -268,9 +262,14 @@ a {
   // }
   #main {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, calc(-50%));  //自适应浏览器
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    // left: 50%;
+    // top: 50%;
+    // transform: translate(-50%, calc(-50%));  //自适应浏览器
     overflow-y: hidden;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -282,13 +281,12 @@ a {
     // margin: 10px 0 10px 0;
     // padding: 0 10% 0 10%;
     background-clip: content-box;
-    background-color: #dddddd70;
+    background-color: #00000038; //#dddddd70;
     z-index: 3;
     #top-bar {
       display: flex;
       width: 100%;
       height: 10%;
-      border-bottom: 0.4px solid;
       #logo {
         display: inline-flex;
         width: 23%;
@@ -311,7 +309,7 @@ a {
           margin-left: 10%;
           padding-left: 1%;
           border-radius: 90px;
-          background: #b3b3b394;
+          background: #b3b3b340;
           #search-form {
             display: flex;
             width: 100%;
@@ -342,14 +340,12 @@ a {
             }
           }
         }
-        #avatar-container {
+        #username-container {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 3.4vw;
-          height: 3.4vw;
           margin-left: 10%;
-          div, span {
+          #login-view {
             cursor: pointer;
           }
         }
@@ -368,7 +364,7 @@ a {
       opacity: 0;
     }
     #right-bar {
-      width: 23%;
+      width: 380px;
       height: 100%;
       float: right;
       transform: translateY(-100%);

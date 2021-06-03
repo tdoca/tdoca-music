@@ -2,7 +2,9 @@ export default {
   state: {
     play_list_visibility: false,
     right_bar_visibility: false,
-    search_Keywords: '',
+    menu_visibility: false,
+    right_container_view: null,
+    search_keywords: '',
     search_view_visibility: true
   },
   getters: {
@@ -13,7 +15,7 @@ export default {
       return state.right_bar_visibility
     },
     getSearchKeywords: state => {
-      return state.search_Keywords
+      return state.search_keywords
     },
     getSearchViewVisibility: state => {
       return state.search_view_visibility
@@ -21,7 +23,7 @@ export default {
   },
   mutations: {
     setSearchKeywords: (state, keywords) => {
-      state.search_Keywords = keywords
+      state.search_keywords = keywords
     }
   },
   actions: {
