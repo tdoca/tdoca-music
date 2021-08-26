@@ -4,15 +4,7 @@
       <img :src="this.$store.getters.getPlayItem.cover" alt="music cover">
     </div>
     <div id="lyric-container">
-      <lyric-list :lyricList="this.$store.getters.getPlayItem.lyric"></lyric-list>
-      <!-- <span>何処に行けばいい 貴方と離れて</span>
-      <span>今は過ぎ去った 時流(とき)に問い掛けて</span>
-      <span>長すぎた夜に 旅立ちを夢見た</span>
-      <span>異国の空見つめて 孤独を抱きしめた</span>
-      <span>流れる涙を 時代(とき)の風に重ねて</span>
-      <span>終わらない貴女の 吐息を感じて</span>
-      <span>Dry your tears with love</span>
-      <span>Dry your tears with love</span> -->
+      <lyric-list :lyric="this.$store.getters.getPlayItem.lyric"></lyric-list>
     </div>
   </div>
 </template>

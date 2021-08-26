@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import {createSongSheet, getSongSheetByUid, getMusicListByIds, getLyricById} from '@/libs/api'
+import {createSongSheet, getSongSheetByUid} from '@/libs/api'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'song-sheet',
@@ -83,15 +83,18 @@ export default {
         this.create_order_visibility=false
       }
     },
-    handlePlayButtonClick: function(songSheetItem){
-      getMusicListByIds(songSheetItem.songs.toString()).then(async res=>{
-        console.log(res)
-        await this.musicListInit(res)
-        if(this.getPlayItem().lyric == null) {
-          await (this.getPlayItem().lyric = getLyricById({id:this.getPlayItem().id}))
-        }
-        this.playMusic()
-      })
+    handlePlayButtonClick: async function(songSheetItem){
+      console.log(songSheetItem)
+      await this.musicListInit(songSheetItem.songs)
+      this.playMusic()
+      // getMusicListByIds(songSheetItem.songs.toString()).then(async res=>{
+      //   console.log(res)
+      //   await this.musicListInit(res)
+      //   if(this.getPlayItem().lyric == null) {
+      //     await (this.getPlayItem().lyric = getLyricById({id:this.getPlayItem().id}))
+      //   }
+      //   this.playMusic()
+      // })
     },
     ...mapGetters(['getUid','getLoginStatus','getSongSheetList','getPlayItem']),
     ...mapMutations(['setSongSheetList','updateSongSheetList']),
@@ -135,12 +138,10 @@ export default {
   width: 100%;
   height: 100%;
   #sheet-container {
-    // width: calc(100% - 72px);
     height: 100%;
     display: flex;
     flex-wrap: wrap;
     overflow-y: scroll;
-    // align-content: flex-start;
     padding-left: 67px;
     .song-sheet-block{
       width: 144px;
@@ -168,7 +169,10 @@ export default {
           display: inline-block;
           width: 100%;
           height: 104px;
-          color: #e1e1e1cc;
+          // color: #e1e1e1cc;
+          color: #fff;
+          font-size: 20px;
+          padding: 3px 0px 0px 10px;
         }
         i{
           position: relative;
@@ -216,7 +220,7 @@ export default {
           color: #fff;
         }
         #cancel{
-          margin-left: 20px;
+          margin: 0 20px 0 20px;
           cursor: pointer;
         }:hover{
           color: #fff;

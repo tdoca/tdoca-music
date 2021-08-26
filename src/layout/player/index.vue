@@ -2,14 +2,13 @@
   <div id="player">
     <div id="left-side">
       <div id="nav-container">
-        <router-link :to="{name: 'songlist'}" class="nav-item">歌单</router-link> | 
+        <router-link :to="{name: 'songsheet'}" class="nav-item">歌单</router-link> | 
         <router-link :to="{name: 'playlist'}" class="nav-item">播放列表</router-link> | 
         <router-link :to="{name: 'history'}" class="nav-item">历史记录</router-link>
       </div>
       <div id="view-container">
         <router-view v-if="this.$store.getters.getSearchViewVisibility" />
       </div>
-      <!-- <music-list :music-list="this.$store.getters.getPlayList" :scroll="true" :category="true" :isPlayList="true"></music-list> -->
     </div>
     <div id="right-side">
       <right-cover></right-cover>
@@ -39,7 +38,6 @@ export default {
   width: 100%;
   height: 90%;
   overflow: hidden;
-  // background: red;
   #left-side{
     width: 840px;
     height: 90%;
@@ -51,11 +49,16 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
+      // color: #e1e1e1cc;
+      color: #fff;
       .nav-item {
         font-size: 18px;
         transition: font-size 1s;
+        // color: #e1e1e1cc;
+        color: #fff;
       }:hover {
         font-size: 30px;
+        // color: #fff;
       }
     }
     #view-container {

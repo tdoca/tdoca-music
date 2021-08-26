@@ -31,7 +31,7 @@
       </div>
     </div>
     <transition name="menu_visibility">
-      <ul id="menu" v-show="this.$store.state.app.menu_visibility" ref="menu">
+      <ul id="song_sheet_menu" v-show="this.$store.state.app.menu_visibility" ref="song_sheet_menu">
         <li v-for="songSheetItem in this.$store.getters.getSongSheetList" :key="songSheetItem.sid" @click="handleSongSheetItemClick(songSheetItem)">
           {{songSheetItem.title}}
         </li>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { addMusicToSongSheet, getSongSheetByUid, downloadSource } from '@/libs/api'
+import { addMusicToSongSheet, getSongSheetByUid } from '@/libs/api'
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 export default {
   name: 'music-list',
@@ -80,17 +80,19 @@ export default {
   },
   methods: {
     handlePlayButtonClick: async function(musicItem) {
-      console.log(musicItem.id)
+      // console.log(musicItem.id)
       let play_list = this.getPlayList()
-      let i = play_list.length-1
-      do {
-        if(play_list[i].id == musicItem.id) {
-          await this.musicInit(play_list[i]);
-          this.playMusic()
-          return
-        }
-        console.log(i)
-      }while(i--)
+      if(play_list.length!=0) {
+        let i = play_list.length-1
+        do {
+          if(play_list[i].id == musicItem.id) {
+            await this.musicInit(play_list[i]);
+            this.playMusic()
+            return
+          }
+          console.log(i)
+        }while(i--)
+      }
         // this.addToPlayList(result)
         // await this.$store.dispatch('musicListInit',play_list)
         // console.log(play_list)
@@ -130,12 +132,12 @@ export default {
       this.music_id = musicItem.id
       event.stopPropagation()
       this.$store.state.app.menu_visibility = true
-      let menu = this.$refs['menu']
-      menu.style.top = event.clientY + 'px'
-      menu.style.left = 170 + 'px'
+      let song_sheet_menu = this.$refs['song_sheet_menu']
+      song_sheet_menu.style.top = event.clientY + 'px'
+      song_sheet_menu.style.left = 170 + 'px'
       if(event.clientY>=450) {
-        menu.style.top = event.clientY - 200 + 'px'
-        menu.style.left = 170 + 'px'
+        song_sheet_menu.style.top = event.clientY - 200 + 'px'
+        song_sheet_menu.style.left = 170 + 'px'
       }
     },
     handleSongSheetItemClick: function(songSheetItem) {
@@ -161,9 +163,10 @@ export default {
       }
     },
     handleDownloadButtonClick: function(musicItem) {
-      downloadSource(musicItem.source).then(res=>{
-        console.log(res)
-      })
+      // downloadSource(musicItem.source).then(res=>{
+      //   console.log(res)
+      // })
+      console.log(musicItem)
     },
     ...mapMutations(['removeMusicOfList','updateSongSheetList']),
     ...mapActions(['musicInit','playMusic','addMusicToPlayList','removeMusicOfHistoryList']),
@@ -177,13 +180,12 @@ export default {
   width: 100%;
   height: 100%;
   font-size: 15px;
-  // background: #ffffff;
   #list-category-container {
     display: flex;
     align-items: center;
     width: 100%;
     height: 7%;
-    // background: #ffffff8c;
+    color: #fff;
     #category-number {
       width: calc(7% - 1vw);
       padding-left: 1vw;
@@ -281,16 +283,14 @@ export default {
       }
     }
   }
-  #menu{
+  #song_sheet_menu{
     width: 150px;
     height: 200px;
     list-style: none;
     position: absolute;
-    z-index:9999;
-    // visibility: hidden;
-    // border:1px solid #5A9CCC;
+    overflow-x: scroll;
     box-shadow: 1px 1px 5px #888888;
-    background:#ffffff;
+    background:#b4b4b4b6;
     margin: 0;
     padding: 0;
     li{
@@ -299,7 +299,7 @@ export default {
       cursor:pointer;
     }
     li:hover{
-      background: #9b9b9b;
+      background: #d6d6d6bd;
     }
   }
 }

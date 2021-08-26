@@ -6,7 +6,6 @@
       <span id="password-container">password:<input type="password" name="password" id="password" ref="password"></span>
       <span class="form-button"><input type="submit" value="登录" @click="handleSubmitButton"></span>
       <span class="form-button" @click="a">注册</span>
-      <!-- <span class="form-button">找回密码</span> -->
     </div>
   </form>
 </template>
@@ -30,7 +29,6 @@ export default {
             for(let i=0; i<res.length; i++) {
               res[i].cover = ''
             }
-            // this.$store.commit('setSongSheetList',res)
             await this.$store.commit('updateSongSheetList',res)
             console.log(res)
           })
@@ -39,7 +37,6 @@ export default {
               this.setHistoryList(res)
             })
           })
-          // this.$store.commit('setSongSheetList',)
           alert('登录成功')
           this.$store.dispatch('hideRightBar')
         }else {

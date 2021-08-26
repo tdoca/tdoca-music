@@ -1,41 +1,16 @@
-// let http = require('http')
-// let url = require('url')
-// let router = require('./router.js')
-
-// http.createServer((req, res) => {
-//     console.log(url.parse(req.url).pathname)
-//     router[`${url.parse(req.url).pathname}`](req,res)
-// }).listen(8888)
-
-
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient
 const path = require('path')
 const request = require('request')
 const uuidv4 = require('uuid/v4')
 const mongodbUrl = 'mongodb://localhost'
-const { search, song_url, song_detail, top_playlist_highquality, lyric } = require('./NeteaseCloudMusicApi')
+const { search, song_url, song_detail, lyric } = require('./NeteaseCloudMusicApi')
 
 let app = express()
-
-// app.get('/',(req, res)=>{
-//     let pathname = url.parse(req.url,true).pathname
-//     console.log(pathname)
-//     fs.readFile('res/static/index.html',(err,data)=>{
-//         if(err){
-//             console.log(err)
-//             res.end()
-//             return
-//         }
-//         res.writeHead(200,{'Content-Type': 'html/document;charset=UTF-8'})
-//         res.end(data)
-//         return
-//     })
-// })
 let bodyParser = require('body-parser')
 let jsonParser = bodyParser.json()
 app.use(bodyParser.urlencoded({extended:false}))
-app.use(express.static(path.join(__dirname,'res/static/')))
+// app.use(express.static(path.join(__dirname,'res/static/')))
 
 app.post('/api/signIn', jsonParser, (req, res)=>{
     MongoClient.connect(mongodbUrl, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, mongodb) {
@@ -57,7 +32,6 @@ app.post('/api/signIn', jsonParser, (req, res)=>{
                     status: 'false'
                 }))
             }
-            console.log(result);
             mongodb.close();
         });
     });
@@ -95,10 +69,13 @@ app.post('/api/signUp', jsonParser, (req, res)=>{
 
 app.get('/api/search', async (req, res)=>{
     let keywords = req.query.keywords
-    console.log(keywords)
+    let offset = req.query.offset
+    console.log(keywords,offset)
     try {
         const result = await search({
-            keywords
+            keywords,
+            limit: 30,
+            offset
         })
         res.end(JSON.stringify(result))
     }catch(err) {
@@ -121,15 +98,15 @@ app.get('/api/getMusicUrlById', async (req, res)=>{
     }
 })
 
-app.get('/api/downloadSource', (req, res)=>{
-    request(req.query.url, function(err,result){
-        if(err) throw err
-        result = result.body
-        res.writeHead(200,{"Content-Type":"application/octet-stream",//告诉浏览器这是一个二进制文件
-        "Content-Disposition":`attachment;`})
-        res.end(Buffer.from(result))
-    })
-})
+// app.get('/api/downloadSource', (req, res)=>{
+//     request(req.query.url, function(err,result){
+//         if(err) throw err
+//         result = result.body
+//         res.writeHead(200,{"Content-Type":"application/octet-stream",//告诉浏览器这是一个二进制文件
+//         "Content-Disposition":`attachment;`})
+//         res.end(Buffer.from(result))
+//     })
+// })
 
 app.get('/api/getMusicDetailById', async (req, res)=>{
     let ids = req.query.ids
@@ -140,7 +117,6 @@ app.get('/api/getMusicDetailById', async (req, res)=>{
         })
         res.writeHead(200, {'Content-Type':'application/json;charset=utf-8'})
         res.end(JSON.stringify(result))
-        // res.end()
     }catch(err){
         console.log(err)
     }
@@ -279,6 +255,8 @@ app.post('/api/removeMusicOfPlayHistory', jsonParser, (req,res)=>{
     })
 })
 
-app.listen(8888)
+// app.use(express.static('static'))
+
+app.listen(8080)
 
 console.log('server running')

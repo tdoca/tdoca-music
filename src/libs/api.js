@@ -24,11 +24,12 @@ export const signUp = ({username,password}) => {
   })
 }
 
-export const search = ({keywords}) => {
+export const search = ({keywords,offset}) => {
   return axios.request({
     url: '/api/search',
     params: {
-      keywords
+      keywords,
+      offset
     },
     method: 'get'
   })
@@ -86,35 +87,6 @@ export const addMusicToSongSheet = ({sid,mid}) => {
   })
 }
 
-export const getLyricById = ({id}) => {
-  let result = new Array
-  axios.request({
-    url: '/api/getLyricById',
-    params: {
-      id
-    },
-    method: 'get'
-  }).then(res=>{
-    if('lrc' in res.data.body) {
-      let lyric_list = res.data.body.lrc.lyric.split('\n')
-      lyric_list.forEach(function(item){
-        if(item.split(']')[1]=='' || item=='') {
-          return
-        }
-        let time = item.substring(item.indexOf('[')+1, item.indexOf(']'))
-        let min = parseInt(time.split(':')[0])*60
-        let sec = parseFloat(time.split(':')[1])
-        let duration = parseFloat((min+sec).toFixed(2))
-        result.push({
-          lrc: item.substring(item.indexOf(']')+1),
-          dt: duration
-        })
-      })
-    }
-  })
-  return result
-}
-
 export const getPlayHistoryByUid = ({uid}) => {
   return axios.request({
     url: '/api/getPlayHistoryByUid',
@@ -145,6 +117,35 @@ export const removeMusicOfPlayHistory = ({uid,mid}) => {
     },
     method: 'post'
   })
+}
+
+export const getLyricById = async ({id}) => {
+  let result = new Array
+  await axios.request({
+    url: '/api/getLyricById',
+    params: {
+      id
+    },
+    method: 'get'
+  }).then(res=>{
+    if('lrc' in res.data.body) {
+      let lyric_list = res.data.body.lrc.lyric.split('\n')
+      lyric_list.forEach(function(item){
+        if(item.split(']')[1]=='' || item=='') {
+          return
+        }
+        let time = item.substring(item.indexOf('[')+1, item.indexOf(']'))
+        let min = parseInt(time.split(':')[0])*60
+        let sec = parseFloat(time.split(':')[1])
+        let duration = parseFloat((min+sec).toFixed(2))
+        result.push({
+          lrc: item.substring(item.indexOf(']')+1),
+          dt: duration
+        })
+      })
+    }
+  })
+  return result
 }
 
 export const getMusicById = async (query) => {
@@ -190,7 +191,7 @@ export const getMusicListByIds = async (query) => {
         music_url = music_url_list[j]
         if(query_id == music_url.id) {
           music_obj.id = query_id
-          music_obj.source = music_url.url
+          // music_obj.source = music_url.url
           break
         }
       }
@@ -217,14 +218,14 @@ export const getMusicListByIds = async (query) => {
   return music_list
 }
 
-export const downloadSource = (url)=>{
-  console.log(url)
-  return axios.request({
-    url: '/api/downloadSource',
-    params: {
-      url
-    },
-    method: 'get',
-    responseType: 'arraybuffer'
-  })
-}
+// export const downloadSource = (url)=>{
+//   console.log(url)
+//   return axios.request({
+//     url: '/api/downloadSource',
+//     params: {
+//       url
+//     },
+//     method: 'get',
+//     responseType: 'arraybuffer'
+//   })
+// }

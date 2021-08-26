@@ -1,7 +1,12 @@
 <template>
-  <div id="lyric-list" ref="lyric-list">
-    <span class="lyric-item" ref="lyric-item" v-for="lyricItem in lyricList" :key="lyricList.indexOf(lyricItem)">
+  <div v-if="lyric!=false" id="lyric-list" ref="lyric-list">
+    <span class="lyric-item" ref="lyric-item" v-for="lyricItem in lyric" :key="lyric.indexOf(lyricItem)">
       {{lyricItem.lrc}}
+    </span>
+  </div>
+  <div v-else id="lyric-list">
+    <span class="lyric-item">
+      纯音乐，无歌词
     </span>
   </div>
 </template>
@@ -11,44 +16,41 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'lyric-list',
   props: {
-    lyricList: {
-      type: Array,
-      // required: true
+    lyric: {
+      type: Array
     }
   },
   mounted: function(){
-    this.getAudio().addEventListener('timeupdate',()=>{
-      // if(this.lyric_list != undefined){
-        let lyric_list = this.lyricList
-        let current = this.getAudio().currentTime
-        if(this.$refs['lyric-item'] != null){
-          this.$refs['lyric-item'].forEach(item=>{
-            item.style.fontSize = '14px'
-            item.style.color = '#e1e1e1cc'
-          })
-        
-          let i=lyric_list.length
-          while(i--) {
-            if(current >= lyric_list[i].dt) {
-              this.$refs['lyric-item'][i].style.fontSize = '18px'
-              this.$refs['lyric-item'][i].style.color = '#fff'
-              break
-            }
-          }
-          i=lyric_list.length
-          while(i--) {
-            if(current >= lyric_list[i].dt && i>=3) {
-              let overflow_top = 0
-              for(let j=0; j<i-2; j++) {
-                overflow_top += this.$refs['lyric-item'][j].offsetHeight
-              }
-              this.$refs['lyric-list'].style.marginTop = '-'+overflow_top+'px'
-              break
-            }else if(current < lyric_list[3].dt) {
-              this.$refs['lyric-list'].style.marginTop = '0px'
-            }
+    this.getAudio().addEventListener('timeupdate', ()=>{
+      let lyric_list = this.lyric
+      let current = this.getAudio().currentTime
+      if(this.$refs['lyric-item'] != null && lyric_list != null){
+        this.$refs['lyric-item'].forEach(item=>{
+          item.style.fontSize = '14px'
+          item.style.color = '#e1e1e1cc'
+        })
+        let i=lyric_list.length
+        while(i--) {
+          if(current >= lyric_list[i].dt) {
+            this.$refs['lyric-item'][i].style.fontSize = '18px'
+            this.$refs['lyric-item'][i].style.color = '#fff'
+            break
           }
         }
+        i=lyric_list.length
+        while(i--) {
+          if(current >= lyric_list[i].dt && i>=3) {
+            let overflow_top = 0
+            for(let j=0; j<i-2; j++) {
+              overflow_top += this.$refs['lyric-item'][j].offsetHeight
+            }
+            this.$refs['lyric-list'].style.marginTop = '-'+overflow_top+'px'
+            break
+          }else if(current < lyric_list[3].dt) {
+            this.$refs['lyric-list'].style.marginTop = '0px'
+          }
+        }
+      }
     })
   },
   methods: {
@@ -73,7 +75,8 @@ export default {
     align-items: center;
     color: #e1e1e1cc;
     font-size: 14px;
-    transition: font-size .3s
+    transition: font-size .3s;
+    text-align: center;
   }
 }
 </style>

@@ -21,8 +21,8 @@
       </div>
     </div>
     <i class="iconfont icon-list" ref="play-mode-button" @click="handlePlayModeButtonClick()"></i>
-    <i class="iconfont icon-favorites"></i>
-    <a :href="downloadSource(this.$store.getters.getPlayItem.source)"><i class="iconfont icon-download"></i></a>
+    <!-- <i class="iconfont icon-favorites"></i> -->
+    <i class="iconfont icon-download" @click="handleDownloadButtonClick()"></i>
     <div id="sound-container">
       <i class="iconfont icon-sound-filling"></i>
       <div id="volume-container" ref="volume-bar" @mousedown="handleVolumeBarMouseDown()">
@@ -35,7 +35,7 @@
 
 <script>
 import Music from '@/libs/music'
-import {getLyricById, downloadSource} from '@/libs/api'
+import {getLyricById} from '@/libs/api'
 import {mapActions, mapGetters, mapMutations} from 'vuex'
 // import axios from 'axios'
 export default {
@@ -63,7 +63,9 @@ export default {
     this.getAudio().addEventListener('play', async () => {
       this.$refs['play-button'].className='iconfont icon-bofang'
       if(this.getPlayItem().lyric == null) {
-        await (this.getPlayItem().lyric = getLyricById({id:this.getPlayItem().id}))
+        await getLyricById({id:this.getPlayItem().id}).then(res=>{
+          this.getPlayItem().lyric = res
+        })
       }
       this.addMusicToHistoryList(this.getPlayItem())
     })
@@ -88,13 +90,13 @@ export default {
     })
   },
   methods:{
-    downloadSource,
-    handlePrevButtonClick: function() {
+    // downloadSource,
+    handlePrevButtonClick: async function() {
       switch (this.getPlayMode()){
         case 'list':
           if(this.getPrevMusic() != null){
             this.pauseMusic()
-            this.musicInit(this.getPrevMusic())
+            await this.musicInit(this.getPrevMusic())
             this.playMusic()
           }else {
             this.pauseMusic()
@@ -102,22 +104,22 @@ export default {
           break
         case 'single':
           this.pauseMusic()
-          this.musicInit(this.getPlayItem())
+          await this.musicInit(this.getPlayItem())
           this.playMusic()
           break
         case 'random':
           this.pause()
-          this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
+          await this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
           this.playMusic()
           break
       }
     },
-    handleNextButtonClick: function() {
+    handleNextButtonClick: async function() {
       switch (this.getPlayMode()){
         case 'list':
           if(this.getNextMusic() != null){
             this.pauseMusic()
-            this.musicInit(this.getNextMusic())
+            await this.musicInit(this.getNextMusic())
             this.playMusic()
           }else {
             this.pauseMusic()
@@ -125,12 +127,12 @@ export default {
           break
         case 'single':
           this.pauseMusic()
-          this.musicInit(this.getPlayItem())
+          await this.musicInit(this.getPlayItem())
           this.playMusic()
           break
         case 'random':
           this.pauseMusic()
-          this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
+          await this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
           this.playMusic()
           break
       }
@@ -168,9 +170,7 @@ export default {
     progressMouseUpHandler: function() {
       document.removeEventListener("mousemove", this.progressValueHandler)
       this.getAudio().currentTime = this.getAudio().duration * this.progressValueHandler()
-      // if(this.getAudio().pause != true) {
       this.getAudio().addEventListener('timeupdate', this.progressMoveHandler)
-      // }
       document.removeEventListener("mouseup", this.progressMouseUpHandler)
     },
     progressValueHandler: function() {
@@ -233,18 +233,8 @@ export default {
       }
     },
     handleDownloadButtonClick: function() {
-      // let url = this.getPlayItem().source
-      // axios.get(
-      //   url,
-      //   {
-      //   responseType: 'arraybuffer'
-      // }).then(res=>{
+      // downloadSource(this.getPlayItem().source).then(res=>{
       //   console.log(res)
-      //   let blob = new Blob(Buffer.from(res.data))
-      //   let url = URL.createObjectURL(blob)
-      //   window.open(url)
-      // }).catch(err=>{
-      //   console.log(err)
       // })
     },
     ...mapActions([

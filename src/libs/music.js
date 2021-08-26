@@ -1,5 +1,5 @@
 export default class Music {
-  constructor({id, name, source, cover, artists, album, duration, favorites, lyric, prev, next}) {
+  constructor({id, name, source, cover, artists, album, duration, lyric, prev, next}) {
     this.id = id
     this.name = name
     this.source = source
@@ -7,7 +7,7 @@ export default class Music {
     this.artists = artists
     this.album = album
     this.duration = duration
-    this.favorites = favorites
+    // this.favorites = favorites
     this.lyric = lyric
     this.prev = prev
     this.next = next

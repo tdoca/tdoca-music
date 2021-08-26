@@ -5,7 +5,8 @@ export default {
     menu_visibility: false,
     right_container_view: null,
     search_keywords: '',
-    search_view_visibility: true
+    search_view_visibility: true,
+    search_page: 1
   },
   getters: {
     getPlayListVisibility: state => {
@@ -19,11 +20,17 @@ export default {
     },
     getSearchViewVisibility: state => {
       return state.search_view_visibility
+    },
+    getSearchPage: state => {
+      return state.search_page
     }
   },
   mutations: {
     setSearchKeywords: (state, keywords) => {
       state.search_keywords = keywords
+    },
+    setSearchPage: (state, page) => {
+      state.search_page = page
     }
   },
   actions: {

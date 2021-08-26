@@ -27,14 +27,24 @@ const routes = [
     component: ()=>import('@/layout/player/index.vue'),
     children: [
       {
+        path: '/',
+        name: 'player',
+        component: ()=>import('@/layout/player/views/song_sheet.vue')
+      },
+      {
+        path: '/*',
+        name: '*',
+        component: ()=>import('@/layout/player/views/song_sheet.vue')
+      },
+      {
         path: 'search',
         name: 'player-search',
         component: ()=>import('@/layout/player/views/search.vue')
       },
       {
-        path: 'songlist',
-        name: 'songlist',
-        component: ()=>import('@/layout/player/views/song_list.vue')
+        path: 'songsheet',
+        name: 'songsheet',
+        component: ()=>import('@/layout/player/views/song_sheet.vue')
       },
       {
         path: 'playlist',

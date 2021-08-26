@@ -46,7 +46,6 @@ export default {
   data() {
     return {
       right_bar_visibility: false,
-      // right_container_view: '',
       blur_bg: `url('${defaultBackground}')`,
       old_cover: null,
       isRouterAlive: true
@@ -59,7 +58,7 @@ export default {
   },
   mounted: function() {
     this.$store.getters.getAudio.setAttribute("preload", 'none');
-    this.$store.getters.getAudio.addEventListener('play', () => {
+    this.$store.getters.getAudio.addEventListener('loadstart', () => {
       if(this.$store.getters.getPlayItem.cover !== this.old_cover) {
         this.handleBackground(this.$store.getters.getPlayItem.cover)
       }
@@ -295,6 +294,8 @@ a {
         span {
           margin: 0 auto;
           font-size: 28px;
+          color: #ffffff;
+          text-shadow: 0 1px 4px #fff;
         }
       }
       #nav {
@@ -322,13 +323,14 @@ a {
               border-radius: 0;
               background: initial;
               outline: none;
+              color: #fff;
             }
             i {
               position: relative;
               display: inline-flex;
               width: 10%;
               height: 100%;
-              color: black;
+              color: #fff;
               font-size: 20px;
               align-items: center;
               input {
@@ -345,15 +347,10 @@ a {
           align-items: center;
           justify-content: center;
           margin-left: 10%;
+          color: #fff;
           #login-view {
             cursor: pointer;
           }
-        }
-        #message-container {
-          width: 40px;
-          height: 40px;
-          background: red;
-          margin-left: 5%;
         }
       }
     }

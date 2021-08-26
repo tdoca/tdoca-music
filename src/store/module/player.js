@@ -37,7 +37,7 @@ export default {
         setPlayMode: (state, playMode) => {
             state.play_mode = playMode
         },
-        setMusicItem: (state, music) => {
+        setMusicItem: async (state, music) => {
             state.play_item = music
             state.audio.setAttribute('src', state.play_item.source)
         },
@@ -57,11 +57,15 @@ export default {
         musicInit: async ({commit}, music) => {
             console.log('musicInit')
             if(music.source != null) {
-                commit('setMusicItem', music)
+                await commit('setMusicItem', music)
             }else {
-                await getMusicById(music.id).then((result)=>{
-                    commit('setMusicItem', result)
-                    music = result
+                await getMusicById(music.id).then((res)=>{
+                    for(let key in res) {
+                        if(res[key] != null) {
+                            music[key] = res[key]
+                        }
+                    }
+                    commit('setMusicItem', music)
                 })
             }
             return music
@@ -69,9 +73,9 @@ export default {
         musicListInit: async ({state, dispatch}, play_list) => {
             console.log('musicListInit')
 
-            let query = `${play_list[0].id}`
+            let query = `${(play_list[0].id||play_list[0])}`
             for(let i=1; i<play_list.length; i++) {
-                query+=`,${play_list[i].id}`
+                query+=`,${play_list[i].id||play_list[i]}`
             }
 
             await getMusicListByIds(query).then((result)=>{
@@ -85,6 +89,7 @@ export default {
                 play_list[play_list.length - 1].prev = play_list[play_list.length - 2]
                 play_list[play_list.length - 1].next = play_list[0]
             })
+            console.log(play_list)
             dispatch('musicInit', play_list[0])
             return state.play_list = play_list
         },
@@ -95,12 +100,15 @@ export default {
             state.audio.pause()
         },
         addMusicToPlayList: ({state},music) => {
-            console.log(music)
-            state.play_list[0].prev = music
-            state.play_list[state.play_list.length-1].next = music
-            music.prev = state.play_list[state.play_list.length-1]
-            music.next = state.play_list[0]
-            state.play_list.push(music)
+            if(state.play_list.length != 0) {
+                state.play_list[0].prev = music
+                state.play_list[state.play_list.length-1].next = music
+                music.prev = state.play_list[state.play_list.length-1]
+                music.next = state.play_list[0]
+                state.play_list.push(music)
+            }else {
+                state.play_list.push(music)
+            }
         },
         addMusicToHistoryList: ({state, getters}, music) => {
             if(state.history_list.indexOf(music) == -1) {
