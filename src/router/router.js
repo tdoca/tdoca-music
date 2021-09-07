@@ -38,7 +38,7 @@ const routes = [
       },
       {
         path: 'search',
-        name: 'player-search',
+        name: 'search',
         component: ()=>import('@/layout/player/views/search.vue')
       },
       {

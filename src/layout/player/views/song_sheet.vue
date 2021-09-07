@@ -84,17 +84,8 @@ export default {
       }
     },
     handlePlayButtonClick: async function(songSheetItem){
-      console.log(songSheetItem)
       await this.musicListInit(songSheetItem.songs)
       this.playMusic()
-      // getMusicListByIds(songSheetItem.songs.toString()).then(async res=>{
-      //   console.log(res)
-      //   await this.musicListInit(res)
-      //   if(this.getPlayItem().lyric == null) {
-      //     await (this.getPlayItem().lyric = getLyricById({id:this.getPlayItem().id}))
-      //   }
-      //   this.playMusic()
-      // })
     },
     ...mapGetters(['getUid','getLoginStatus','getSongSheetList','getPlayItem']),
     ...mapMutations(['setSongSheetList','updateSongSheetList']),

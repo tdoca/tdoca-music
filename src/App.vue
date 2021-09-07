@@ -36,7 +36,7 @@
 import defaultBackground from '@/assets/Abstract.jpg'
 import login from '@/components/right_bar/login'
 import register from '@/components/right_bar/register'
-import { mapActions, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'app',
   components: {
@@ -57,16 +57,22 @@ export default {
     }
   },
   mounted: function() {
-    this.$store.getters.getAudio.setAttribute("preload", 'none');
-    this.$store.getters.getAudio.addEventListener('loadstart', () => {
-      if(this.$store.getters.getPlayItem.cover !== this.old_cover) {
-        this.handleBackground(this.$store.getters.getPlayItem.cover)
+    // this.getAudio().src = URL.createObjectURL(this.getMediaSource())
+    // console.log(this.getAudio().src)
+    // this.getMediaSource().addEventListener('sourceopen', ()=>{
+    //   this.setSourceBuffer(this.getMediaSource().addSourceBuffer('audio/mpeg;'))
+    // })
+    this.getAudio().setAttribute("preload", 'none')
+    this.getAudio().addEventListener('loadstart', () => {
+      if(this.getPlayItem().cover !== this.old_cover) {
+        this.blur_bg = `url(${this.getPlayItem().cover})`
       }
-      this.old_cover = this.$store.getters.getPlayItem.cover
+      this.old_cover = this.getPlayItem().cover
     })
   },
   methods: {
     ...mapMutations([
+      // 'setSourceBuffer',
       'setSearchKeywords'
     ]),
     ...mapActions([
@@ -74,6 +80,12 @@ export default {
       'hidePlayList',
       'hideSearchView',
       'showSearchView'
+    ]),
+    ...mapGetters([
+      'getAudio',
+      'getPlayItem',
+      // 'getMediaSource',
+      // 'getSourceBuffer',
     ]),
     reload: function() {
       this.hideSearchView()
@@ -88,8 +100,8 @@ export default {
     },
     handleSearch: function() {
       this.setSearchKeywords(this.$refs['searchValue'].value)
-      if(this.$route.name != 'player-search') {
-        this.$router.push({name: 'player-search'})
+      if(this.$route.name != 'search') {
+        this.$router.push({name: 'search'})
       } else {
         console.log('reload')
         this.reload()
@@ -97,110 +109,6 @@ export default {
     },
     handleRightBarClick: function(event) {
       event.stopPropagation()
-    },
-    handleBackground: async function(imageSource) {
-      let canvas = document.createElement('canvas');
-      let ctx = canvas.getContext('2d');
-      let img = new Image();
-      //解决资源跨域问题
-      img.crossOrigin = "anonymous";
-      //这里直接修改图片的路径
-      img.src = imageSource
-      img.onload = () => {
-        //设置canvas的宽高
-        canvas.height = img.height;
-        canvas.width = img.width;
-
-        //将图像绘制到canvas上面
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-
-        //从画布获取图像
-        img.crossOrigin='anonymous'
-        let data = ctx.getImageData(0, 0, img.width, img.height);
-
-        //将图像数据进行高斯模糊 data.data是一个数组，每四个值代表一个像素点的rgba的值，data.width data.height 分别代表图像数据的宽高
-        let emptyData = gaussBlur(data);
-
-        //将模糊的图像数据再渲染到画布上面
-        ctx.putImageData(emptyData, 0, 0);
-        this.blur_bg = `url(${canvas.toDataURL('image/png')})`
-      }
-
-      function gaussBlur(imgData) {
-          let pixes = imgData.data;
-          let width = imgData.width;
-          let height = imgData.height;
-          let gaussMatrix = [],
-              gaussSum = 0,
-              x, y,
-              r, g, b, a,
-              i, j, k, len;
-
-          let radius = 100;
-          let sigma = 100;
-
-          a = 1 / (Math.sqrt(2 * Math.PI) * sigma);
-          b = -1 / (2 * sigma * sigma);
-          //生成高斯矩阵
-          for (i = 0, x = -radius; x <= radius; x++, i++) {
-              g = a * Math.exp(b * x * x);
-              gaussMatrix[i] = g;
-              gaussSum += g;
-          }
-
-          //归一化, 保证高斯矩阵的值在[0,1]之间
-          for (i = 0, len = gaussMatrix.length; i < len; i++) {
-              gaussMatrix[i] /= gaussSum;
-          }
-          //x 方向一维高斯运算
-          for (y = 0; y < height; y++) {
-              for (x = 0; x < width; x++) {
-                  r = g = b = a = 0;
-                  gaussSum = 0;
-                  for (j = -radius; j <= radius; j++) {
-                      k = x + j;
-                      if (k >= 0 && k < width) {//确保 k 没超出 x 的范围
-                          //r,g,b,a 四个一组
-                          i = (y * width + k) * 4;
-                          r += pixes[i] * gaussMatrix[j + radius];
-                          g += pixes[i + 1] * gaussMatrix[j + radius];
-                          b += pixes[i + 2] * gaussMatrix[j + radius];
-                          // a += pixes[i + 3] * gaussMatrix[j];
-                          gaussSum += gaussMatrix[j + radius];
-                      }
-                  }
-                  i = (y * width + x) * 4;
-                  // 除以 gaussSum 是为了消除处于边缘的像素, 高斯运算不足的问题
-                  pixes[i] = r / gaussSum;
-                  pixes[i + 1] = g / gaussSum;
-                  pixes[i + 2] = b / gaussSum;
-                  // pixes[i + 3] = a ;
-              }
-          }
-          //y 方向一维高斯运算
-          for (x = 0; x < width; x++) {
-              for (y = 0; y < height; y++) {
-                  r = g = b = a = 0;
-                  gaussSum = 0;
-                  for (j = -radius; j <= radius; j++) {
-                      k = y + j;
-                      if (k >= 0 && k < height) {//确保 k 没超出 y 的范围
-                          i = (k * width + x) * 4;
-                          r += pixes[i] * gaussMatrix[j + radius];
-                          g += pixes[i + 1] * gaussMatrix[j + radius];
-                          b += pixes[i + 2] * gaussMatrix[j + radius];
-                          // a += pixes[i + 3] * gaussMatrix[j];
-                          gaussSum += gaussMatrix[j + radius];
-                      }
-                  }
-                  i = (y * width + x) * 4;
-                  pixes[i] = r / gaussSum;
-                  pixes[i + 1] = g / gaussSum;
-                  pixes[i + 2] = b / gaussSum;
-              }
-          }
-          return imgData;
-      }
     }
   }
 }
@@ -229,7 +137,7 @@ a {
 
 #app {
   position: absolute;
-  // overflow: hidden;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   min-width: 1280px;
@@ -237,7 +145,6 @@ a {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
-  // filter: blur(2px);
   // z-index: -1;
   #bg {
     position: relative;
@@ -245,20 +152,10 @@ a {
     height: 100%;
     background: no-repeat 50% 50%;
     background-size: cover;
+    filter: blur(50px);
+    transform: scale(1.2);
     transition: background-image 1s;
   }
-  // #bg::after {
-  //   position: absolute;
-  //   content: "";
-  //   width: 100%;
-  //   height: 100%;
-  //   left: 0;
-  //   top: 0;
-  //   /* 从父元素继承 background 属性的设置 */
-  //   background: inherit;
-  //   filter: blur(7px);
-  //   z-index: 2;
-  // }
   #main {
     position: absolute;
     top: 0;
@@ -268,7 +165,7 @@ a {
     margin: auto;
     // left: 50%;
     // top: 50%;
-    // transform: translate(-50%, calc(-50%));  //自适应浏览器
+    // transform: translate(-50%, calc(-50%));
     overflow-y: hidden;
     overflow-x: hidden;
     scrollbar-width: none;

@@ -88,8 +88,7 @@ app.get('/api/getMusicUrlById', async (req, res)=>{
     console.log(id)
     try {
         const result = await song_url({
-            id,
-            br: 320000
+            id
         })
         res.writeHead(200, {'Content-Type':'application/json;charset=utf-8'})
         res.end(JSON.stringify(result))
@@ -244,7 +243,7 @@ app.post('/api/removeMusicOfPlayHistory', jsonParser, (req,res)=>{
         db_user.collection('user_play_history').find({uid: requestData.uid}).toArray(function(err, result){
             if(err) throw err
             let songs = result[0].songs
-            songs.splice(songs.indexOf(requestData.mid), 1)
+            songs.splice(requestData.index, 1)
             db_user.collection('user_play_history').updateOne({uid: requestData.uid},{$set: {songs}},function(err,result){
                 if(err) throw err
                 res.writeHead(200, {'Content-Type':'text/html;charset=utf-8'})

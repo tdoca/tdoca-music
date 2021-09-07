@@ -8,8 +8,8 @@
       <div id="category-duration">时长</div>
     </div>
     <div id="music-item-container" :style="scroll ? {'overflow': 'overlay'}:{'overflow':'hidden'}">
-      <div class="music-item" :class="musicList.indexOf(musicItem)%2===0 ? 'even':'odd'" v-for="musicItem in musicList" :key="musicList.indexOf(musicItem)" @mousemove="handleMusicItemMouseMove(musicList.indexOf(musicItem))" @mouseout="handleMusicItemMouseOut(musicList.indexOf(musicItem))">
-        <div class="music-item-number">{{musicList.indexOf(musicItem)}}</div>
+      <div class="music-item" :class="musicIndex%2===0 ? 'even':'odd'" v-for="(musicItem, musicIndex) in musicList" :key="musicIndex" @mousemove="handleMusicItemMouseMove(musicIndex)" @mouseout="handleMusicItemMouseOut(musicIndex)">
+        <div class="music-item-number">{{musicIndex}}</div>
         <div class="music-item-name">
           <span ref="name">{{musicItem.name}}</span>
           <div ref="control" style="display:none">
@@ -24,7 +24,7 @@
           <div ref="duration">
             {{`${parseInt(musicItem.duration/60000)}:${parseInt((musicItem.duration-parseInt(musicItem.duration/60000)*60000)/1000)}`}}
           </div>
-          <div v-if="listView=='playList' || listView=='history'" ref="remove" style="display:none" @click="handleRemoveButtonClick(musicItem)">
+          <div v-if="listView=='playList' || listView=='history'" ref="remove" style="display:none" @click="handleRemoveButtonClick(musicIndex)">
             <i class="iconfont icon-ashbin"></i>
           </div>
         </div>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { addMusicToSongSheet, getSongSheetByUid } from '@/libs/api'
+import { addMusicToSongSheet, getSongSheetByUid, getMusicUrlById, handleDownload } from '@/libs/api'
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 export default {
   name: 'music-list',
@@ -80,7 +80,6 @@ export default {
   },
   methods: {
     handlePlayButtonClick: async function(musicItem) {
-      // console.log(musicItem.id)
       let play_list = this.getPlayList()
       if(play_list.length!=0) {
         let i = play_list.length-1
@@ -93,12 +92,8 @@ export default {
           console.log(i)
         }while(i--)
       }
-        // this.addToPlayList(result)
-        // await this.$store.dispatch('musicListInit',play_list)
-        // console.log(play_list)
       this.addMusicToPlayList(await this.musicInit(musicItem))
       this.playMusic()
-        // console.log(result)
     },
     handleMusicItemMouseMove: function(index) {
       switch(this.listView){
@@ -152,21 +147,21 @@ export default {
         alert('此歌单已存在这首歌')
       }
     },
-    handleRemoveButtonClick: async function(musicItem) {
+    handleRemoveButtonClick: async function(musicIndex) {
       switch(this.listView) {
         case 'playList':
-          this.removeMusicOfList(this.musicList.indexOf(musicItem))
+          this.removeMusicOfList(musicIndex)
           break
         case 'history':
-          this.removeMusicOfHistoryList(musicItem)
+          this.removeMusicOfHistoryList(musicIndex)
           break
       }
     },
     handleDownloadButtonClick: function(musicItem) {
-      // downloadSource(musicItem.source).then(res=>{
-      //   console.log(res)
-      // })
-      console.log(musicItem)
+      getMusicUrlById({id:musicItem.id}).then(res=>{
+        let url = res[0].source
+        handleDownload(url,musicItem.name)
+      })
     },
     ...mapMutations(['removeMusicOfList','updateSongSheetList']),
     ...mapActions(['musicInit','playMusic','addMusicToPlayList','removeMusicOfHistoryList']),

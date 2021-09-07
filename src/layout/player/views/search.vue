@@ -4,12 +4,29 @@
       <music-list :music-list="this.music_list" :listView="'musicList'" :scroll="true" :category="true"></music-list>
     </div>
     <div id="pages-container">
-        <div v-if="getSearchPage() != 1" @click="handlePageButtonClick(0)">1</div>
-        <div v-if="getSearchPage() != 1" @click="handlePageButtonClick((getSearchPage()-1)*30)">上一页</div>
-        <div @click="handlePageButtonClick(getSearchPage()*30)">{{getSearchPage()}}</div>
-        <!-- <div v-if="search_page < end-4">...</div> -->
-        <div v-if="getSearchPage() != max_page" @click="handlePageButtonClick((getSearchPage()+1)*30)">下一页</div>
-        <div v-if="getSearchPage() != max_page" @click="handlePageButtonClick(max_page*30)">{{this.max_page}}</div>
+        <div v-if="getSearchPage()!=1" @click="handlePageButtonClick(getSearchPage()-1)">上一页</div>
+        <div v-if="getSearchPage()>=4" @click="handlePageButtonClick(1)">1</div>
+        <div v-if="getSearchPage()>=5" @click="function(){
+            if(getSearchPage()-10<=1) {
+              handlePageButtonClick(1)
+            }else {
+              handlePageButtonClick(getSearchPage()-10)
+            }
+          }">...</div>
+        <div v-if="getSearchPage()>=3" @click="handlePageButtonClick(getSearchPage()-2)">{{getSearchPage()-2}}</div>
+        <div v-if="getSearchPage()>=2" @click="handlePageButtonClick(getSearchPage()-1)">{{getSearchPage()-1}}</div>
+        <div style="background-color: #b4b4b45c;">{{getSearchPage()}}</div>
+        <div v-if="max_page>=2 && max_page-getSearchPage()>=1" @click="handlePageButtonClick(getSearchPage()+1)">{{getSearchPage()+1}}</div>
+        <div v-if="max_page>=3 && max_page-getSearchPage()>=2" @click="handlePageButtonClick(getSearchPage()+2)">{{getSearchPage()+2}}</div>
+        <div v-if="(max_page-getSearchPage())>=4" @click="function(){
+            if(getSearchPage()+10>=max_page) {
+              handlePageButtonClick(max_page)
+            }else {
+              handlePageButtonClick(getSearchPage()+10)
+            }
+          }">...</div>
+        <div v-if="(max_page-getSearchPage())>=3" @click="handlePageButtonClick(max_page)">{{this.max_page}}</div>
+        <div v-if="getSearchPage()!=max_page" @click="handlePageButtonClick(getSearchPage()+1)">下一页</div>
       </div>
   </div>
 </template>
@@ -20,7 +37,7 @@ import Music from '@/libs/music'
 import musicList from '@/components/music_list'
 import { mapGetters, mapMutations } from 'vuex'
 export default {
-  name: 'player-search',
+  name: 'search',
   data(){
     return {
       music_list: [],
@@ -31,15 +48,19 @@ export default {
   components:{
     musicList
   },
-  created: function(){
+  created(){
     console.log(this.$store.getters.getSearchKeywords)
     if(this.$store.getters.getSearchKeywords != '') {
       search({keywords: this.$store.getters.getSearchKeywords,offset:0}).then((res)=>{
         let songs = res.data.body.result.songs
         this.song_count = res.data.body.result.songCount
         this.setSearchPage(1)
-        if(parseFloat(this.song_count & 30) != 0) {
+        if(this.song_count>=30 && (this.song_count%30)==0) {
+          this.max_page = parseInt(this.song_count / 30)
+        }else if(this.song_count>=30 && (this.song_count%30)>=1) {
           this.max_page = parseInt(this.song_count / 30) + 1
+        }else {
+          this.max_page = 1
         }
         let musicList = new Array()
         for(let i=0, length=songs.length; i<length; i++) {
@@ -55,16 +76,11 @@ export default {
       })
     }
   },
-  methods:{
+  methods: {
     handlePageButtonClick: function(page) {
-      search({keywords: this.$store.getters.getSearchKeywords,offset:page}).then((res)=>{
+      search({keywords: this.$store.getters.getSearchKeywords,offset:page*30-30}).then((res)=>{
         let songs = res.data.body.result.songs
-        if(page < this.max_page) {
-          console.log('max')
-          this.setSearchPage(page)
-        }else {
-          this.setSearchPage(this.max_page)
-        }
+        this.setSearchPage(page)
         let musicList = new Array()
         for(let i=0, length=songs.length; i<length; i++) {
           musicList.push(new Music({

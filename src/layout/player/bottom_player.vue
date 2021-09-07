@@ -35,7 +35,7 @@
 
 <script>
 import Music from '@/libs/music'
-import {getLyricById} from '@/libs/api'
+import {getLyricById, handleDownload} from '@/libs/api'
 import {mapActions, mapGetters, mapMutations} from 'vuex'
 // import axios from 'axios'
 export default {
@@ -47,6 +47,7 @@ export default {
   },
   created: async function(){
     await this.musicListInit([
+      new Music({id: '1811303184'}),
       new Music({id: '28256124'}),
       new Music({id: '26201979'}),
       new Music({id: '27258185'}),
@@ -56,7 +57,7 @@ export default {
       new Music({id: '22805698'}),
       new Music({id: '22826401'}),
       new Music({id: '1329967179'}),
-      new Music({id: '4997987'})
+      // new Music({id: '4997987'})
     ])
   },
   mounted: function(){
@@ -72,25 +73,24 @@ export default {
 
     this.getAudio().addEventListener('timeupdate', this.progressMoveHandler)
 
-    this.getAudio().addEventListener('ended', () => {
+    this.getAudio().addEventListener('ended', async () => {
       switch (this.getPlayMode()){
         case 'list':
-          this.musicInit(this.getNextMusic())
+          await this.musicInit(this.getNextMusic())
           this.playMusic()
           break
         case 'random':
-          this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
+          await this.musicInit(this.getPlayList()[this.randomNum(0,this.getPlayList().length+1)])
           this.playMusic()
           break
         case 'single':
-          this.musicInit(this.getPlayItem())
+          await this.musicInit(this.getPlayItem())
           this.playMusic()
           break
       }
     })
   },
   methods:{
-    // downloadSource,
     handlePrevButtonClick: async function() {
       switch (this.getPlayMode()){
         case 'list':
@@ -233,6 +233,7 @@ export default {
       }
     },
     handleDownloadButtonClick: function() {
+      handleDownload(this.getPlayItem().source, this.getPlayItem().name)
       // downloadSource(this.getPlayItem().source).then(res=>{
       //   console.log(res)
       // })

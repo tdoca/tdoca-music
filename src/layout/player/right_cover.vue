@@ -13,9 +13,6 @@
 import lyricList from '@/components/lyric_list'
 export default {
   name: 'right-cover',
-  mounted: function() {
-    console.log(this.$store.getters.getPlayItem)
-  },
   components: {
     lyricList
   }

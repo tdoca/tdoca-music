@@ -44,11 +44,10 @@ export default {
       }
       query = query.toString()
       getMusicDetailById({ids:query}).then(res=>{
-        res = res.data.body.songs
         for(let i=0; i<song_sheet_list.length; i++) {
           for(let j=0; j<res.length; j++) {
             if(song_sheet_list[i].songs[0] == res[j].id) {
-              song_sheet_list[i].cover = res[j].al.picUrl
+              song_sheet_list[i].cover = res[j].cover
               break
             }
           }
